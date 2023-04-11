@@ -6,7 +6,7 @@
 	"license": "MIT",
 	"type": "commonjs",
 	"bin": {
-		"plink": "dist/index.js"
+		"plink": "dist/index.mjs"
 	},
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",
@@ -25,10 +25,14 @@
 		"dev": "tsup src/index.ts --watch --format esm"
 	},
 	"devDependencies": {
+		"@types/fs-extra": "^11.0.1",
+		"prettier": "^2.8.7",
 		"tsup": "^6.7.0",
 		"typescript": "^5.0.3"
 	},
 	"dependencies": {
-		"commander": "^10.0.0"
+		"commander": "^10.0.0",
+		"fs-extra": "^11.1.1",
+		"zod": "^3.21.4"
 	}
 }
