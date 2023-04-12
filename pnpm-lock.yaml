@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@types/fs-extra': ^11.0.1
   '@types/node': ^18.15.11
+  chalk: ^5.2.0
   commander: ^10.0.0
   fs-extra: ^11.1.1
   glob: ^10.0.0
@@ -12,6 +13,7 @@ specifiers:
   zod: ^3.21.4
 
 dependencies:
+  chalk: 5.2.0
   commander: 10.0.0
   fs-extra: 11.1.1
   glob: 10.0.0
@@ -321,6 +323,11 @@ packages:
     resolution: {integrity: sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==}
     engines: {node: '>=8'}
     dev: true
+
+  /chalk/5.2.0:
+    resolution: {integrity: sha512-ree3Gqw/nazQAPuJJEy+avdl7QfZMcUvmHIKgEZkGL+xOBzRvup5Hxo6LHuMceSxOabuJLJm5Yp/92R9eMmMvA==}
+    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+    dev: false
 
   /chokidar/3.5.3:
     resolution: {integrity: sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==}

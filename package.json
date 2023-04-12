@@ -32,6 +32,7 @@
 		"typescript": "^5.0.3"
 	},
 	"dependencies": {
+		"chalk": "^5.2.0",
 		"commander": "^10.0.0",
 		"fs-extra": "^11.1.1",
 		"glob": "^10.0.0",

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { install } from './commands';
+import { install, init } from './commands';
 
 const program = new Command();
 
@@ -11,5 +11,6 @@ program
 	.description('A command line tool for linking packages');
 
 program.command('install').action(install);
+program.command('init').action(init);
 
 program.parseAsync();
