@@ -15,7 +15,7 @@ export default async function install() {
 
 	if (!(await fse.pathExists(configFileName))) {
 		logInfo(
-			`No config file found. Please run '${packageName} init' if wish to use ${packageName}.`
+			`${packageName} config file was not found. Run '${packageName} init' if you wish to generate new one.`
 		);
 		log('');
 
@@ -28,7 +28,7 @@ export default async function install() {
 
 	if (!schemaParseResult.success) {
 		logError(
-			`${packageName} config file is invalid. Please run '${packageName} init' to generate valid config file.`
+			`${packageName} config file is invalid. Run '${packageName} init --force' to generate new one.`
 		);
 		log('');
 
@@ -39,7 +39,7 @@ export default async function install() {
 
 	if (!config.enabled) {
 		logInfo(
-			`${packageName} is disabled. Please enable if you wish to use ${packageName}.`
+			`${packageName} is disabled. change the 'enable' key to 'true' in '${configFileName}' file if you wish.`
 		);
 		log('');
 
