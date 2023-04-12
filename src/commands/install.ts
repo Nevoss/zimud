@@ -1,7 +1,9 @@
 import {configScheme} from '../schemes';
 import fse from 'fs-extra';
+import path from 'path';
 import {configFileName} from '../consts';
 import spawn from "../utils/spawn";
+import {glob} from "glob";
 
 export default async function install() {
 	// Check if config file exists.
@@ -15,8 +17,15 @@ export default async function install() {
 	}
 
 	// Run over the packages and make sure the paths are valid.
-	const packagesPaths = Object.entries(config.packages)
-		.map(([, path]) => path)
+	const packagesPaths: string[] = (
+		await Promise.all(
+			Object.entries(config.packages)
+				.map(([, pattern]) => pattern)
+				.map(pattern => glob(pattern) )
+		)
+	)
+		.flat()
+		.map((dirPath) => path.resolve(dirPath));
 
 	// Check which package manager the user is using.
 	await spawn(
