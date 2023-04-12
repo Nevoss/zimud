@@ -15,7 +15,7 @@ export default async function install() {
 
 	if (!(await fse.pathExists(configFileName))) {
 		logInfo(
-			`${packageName} config file was not found. Run '${packageName} init' if you wish to generate new one.`
+			`${packageName} config file was not found. Run '${packageName} init' if you wish to generate a new one.`
 		);
 		log('');
 
@@ -28,7 +28,7 @@ export default async function install() {
 
 	if (!schemaParseResult.success) {
 		logError(
-			`${packageName} config file is invalid. Run '${packageName} init --force' to generate new one.`
+			`${packageName} config file is invalid. Run '${packageName} init --force' to generate a new one.`
 		);
 		log('');
 

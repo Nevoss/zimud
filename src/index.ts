@@ -11,6 +11,9 @@ program
 	.description('A command line tool for linking packages');
 
 program.command('install').action(install);
-program.command('init').action(init);
+program
+	.command('init')
+	.option('-f, --force', 'create a config file even if it already exists.')
+	.action(init);
 
 program.parseAsync();
