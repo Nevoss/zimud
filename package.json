@@ -1,7 +1,7 @@
 {
 	"name": "plink",
-	"version": "0.1.0",
-	"description": "",
+	"version": "0.0.0",
+	"description": "ClI tool for creating and managing packages links",
 	"author": "Nevo Golan",
 	"license": "MIT",
 	"type": "commonjs",
@@ -22,9 +22,11 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build": "tsup src/index.ts --format cjs,esm --dts",
-		"dev": "tsup src/index.ts --watch --format esm"
+		"dev": "tsup src/index.ts --watch --format esm",
+		"lint": "tsc"
 	},
 	"devDependencies": {
+		"@changesets/cli": "^2.26.1",
 		"@types/fs-extra": "^11.0.1",
 		"@types/node": "^18.15.11",
 		"prettier": "^2.8.7",
