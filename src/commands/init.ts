@@ -1,6 +1,6 @@
-import { logBlock, logInfo, logSuccess } from '../utils/logs';
+import { logBlock, logInfo, logSuccess, logWarn } from '../utils/logs';
 import fse from 'fs-extra';
-import { configFileName, packageName } from '../consts';
+import { configFileName, gitIgnoreFileName, packageName } from '../consts';
 import { Config } from '../schemes/config';
 import ConfigFileExistsError from '../errors/config-file-exists-error';
 
@@ -15,11 +15,23 @@ export default async function init({ force }: { force: boolean }) {
 
 	await createConfigFile(configFileName);
 
-	// TODO: Add plink config file to .gitignore if exists, otherwise log a warning.
+	const gitIgnoreModifiedSuccessfully = await appendConfigFileToGitIgnore(
+		gitIgnoreFileName,
+		configFileName
+	);
 
 	logBlock(() => {
 		logSuccess(`${packageName} config file was generated successfully.`);
+		// TODO: log which file was modified and generated.
 	});
+
+	if (!gitIgnoreModifiedSuccessfully) {
+		logBlock(() => {
+			logWarn(
+				`Could not read ${gitIgnoreFileName} file. Please add ${configFileName} to ${gitIgnoreFileName} manually.`
+			);
+		});
+	}
 }
 
 async function isConfigFileExists(configFileName: string) {
@@ -33,4 +45,21 @@ async function createConfigFile(configFileName: string) {
 	};
 
 	await fse.writeJSON(configFileName, config, { spaces: 2 });
+}
+
+async function appendConfigFileToGitIgnore(
+	gitIgnoreFileName: string,
+	configFileName: string
+) {
+	try {
+		const gitIgnoreFileContent = await fse.readFile(gitIgnoreFileName);
+
+		if (!gitIgnoreFileContent.includes(configFileName)) {
+			await fse.appendFile(gitIgnoreFileName, configFileName);
+		}
+
+		return true;
+	} catch (e) {
+		return false;
+	}
 }
