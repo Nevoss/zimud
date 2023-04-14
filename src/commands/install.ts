@@ -13,7 +13,7 @@ const exec = promisify(originalExec);
 export default async function install() {
 	logInfo(`${packageName} install command is running...`);
 
-	if (!(await fse.pathExists(configFileName))) {
+	if (!(await isConfigFileExists(configFileName))) {
 		logInfo(
 			`${packageName} config file was not found. Run '${packageName} init' if you wish to generate a new one.`
 		);
@@ -21,17 +21,7 @@ export default async function install() {
 		return;
 	}
 
-	const schemaParseResult = configScheme.safeParse(
-		await fse.readJSON(configFileName)
-	);
-
-	if (!schemaParseResult.success) {
-		throw new InvalidConfigError(
-			`${packageName} config file is invalid. Run '${packageName} init --force' to generate a new one.`
-		);
-	}
-
-	const config = schemaParseResult.data;
+	const config = await parseConfig(configFileName);
 
 	if (!config.enabled) {
 		logInfo(
@@ -41,67 +31,24 @@ export default async function install() {
 		return;
 	}
 
-	const globPatterns = config.packages.filter((p) => p.includes('*'));
-	const packages = config.packages.filter((p) => !globPatterns.includes(p));
-
-	if (globPatterns.length) {
-		const globResult = await Promise.all(
-			Object.entries(globPatterns)
-				.map(([, pattern]) => pattern)
-				.map((pattern) => glob(pattern))
-		);
-
-		packages.push(...globResult.flat());
-	}
-
-	// Run over the packages and make sure the paths are valid.
-	const packagesPaths = packages
-		.map((dirPath) => path.resolve(dirPath))
-		.map((dirPath) => {
-			const valid = fse.pathExistsSync(
-				`${dirPath}/${packageJsonFileName}`
-			);
-
-			try {
-				const pkg = fse.readJSONSync(
-					`${dirPath}/${packageJsonFileName}`
-				);
-
-				return {
-					name: valid && pkg?.name ? pkg.name : dirPath,
-					valid,
-					path: dirPath,
-				};
-			} catch (e) {
-				return {
-					name: dirPath,
-					valid: false,
-					path: dirPath,
-				};
-			}
-		});
-
-	const validPackages = packagesPaths.filter((p) => p.valid);
-	const invalidPackages = packagesPaths.filter((p) => !p.valid);
+	const [validPackages, invalidPackages] = groupByValidity(
+		await extractPackages(config.packages)
+	);
 
 	if (validPackages.length === 0) {
 		logWarn(`${packageName} has no valid packages to install.`);
-	} else {
-		await exec(
-			[
-				'npm install',
-				...validPackages.map((p) => p.path),
-				'--no-package-lock',
-				'--no-save',
-			].join(' ')
-		);
+	}
+
+	if (validPackages.length > 0) {
+		await installPackages(validPackages);
+
+		const packageNames = await extractPackagesNames(validPackages);
 
 		logBlock(() => {
 			logSuccess(
 				`${packageName} has successfully installed the following packages:`
 			);
-
-			validPackages.forEach((p) => log(`   - ${p.name}`));
+			logPackages(packageNames);
 		});
 	}
 
@@ -110,8 +57,85 @@ export default async function install() {
 			logWarn(
 				'Some packages are not installed because they are invalid. Please check the following packages:'
 			);
-
-			invalidPackages.forEach((p) => log(`   - ${p.name}`));
+			logPackages(invalidPackages);
 		});
 	}
+}
+
+async function isConfigFileExists(configFileName: string) {
+	return await fse.pathExists(configFileName);
+}
+
+async function parseConfig(configFileName: string) {
+	try {
+		return configScheme.parse(await fse.readJSON(configFileName));
+	} catch (e) {
+		throw new InvalidConfigError(
+			`${packageName} config file is invalid. Run '${packageName} init --force' to generate a new one.`
+		);
+	}
+}
+
+async function extractPackages(packagesPatters: string[]) {
+	const globPatterns = packagesPatters.filter((p) => p.includes('*'));
+	const paths = packagesPatters.filter((p) => !globPatterns.includes(p));
+
+	if (globPatterns.length) {
+		const globResult = await Promise.all(
+			Object.entries(globPatterns)
+				.map(([, pattern]) => pattern)
+				.map((pattern) => glob(pattern))
+		);
+
+		paths.push(...globResult.flat());
+	}
+
+	return paths.map((p) => path.resolve(p));
+}
+
+export function groupByValidity(dirPaths: string[]) {
+	return dirPaths.reduce<[string[], string[]]>(
+		(carry, dirPath) => {
+			const validJSONFile = !!fse.readJSONSync(
+				path.resolve(dirPath, packageJsonFileName),
+				{
+					throws: false,
+				}
+			);
+
+			carry[validJSONFile ? 0 : 1].push(dirPath);
+
+			return carry;
+		},
+		[[], []]
+	);
+}
+
+export async function installPackages(dirPaths: string[]) {
+	await exec(
+		[
+			'npm install',
+			...dirPaths.map((dirPath) => dirPath),
+			'--no-package-lock',
+			'--no-save',
+		].join(' ')
+	);
+}
+
+export async function extractPackagesNames(
+	dirPaths: string[]
+): Promise<string[]> {
+	return await Promise.all(
+		dirPaths.map(async (dirPath) => {
+			const packageJson = await fse.readJSON(
+				path.resolve(dirPath, packageJsonFileName)
+			);
+
+			return packageJson?.name || dirPath;
+		})
+	);
+}
+
+export function logPackages(names: string[]) {
+	names.forEach((names) => log(`   - ${names}`));
 }
