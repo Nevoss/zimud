@@ -3,23 +3,22 @@ import fse from 'fs-extra';
 import path from 'path';
 import { configFileName, packageJsonFileName, packageName } from '../consts';
 import { glob } from 'glob';
-import { log, logError, logInfo, logSuccess, logWarn } from '../utils/logs';
+import { log, logInfo, logSuccess, logWarn } from '../utils/logs';
 import { promisify } from 'util';
 import { exec as originalExec } from 'child_process';
+import InvalidConfigError from '../errors/invalid-config-error';
 
 const exec = promisify(originalExec);
 
 export default async function install() {
-	log('');
 	logInfo(`${packageName} install command is running...`);
 
 	if (!(await fse.pathExists(configFileName))) {
 		logInfo(
 			`${packageName} config file was not found. Run '${packageName} init' if you wish to generate a new one.`
 		);
-		log('');
 
-		process.exit(0);
+		return;
 	}
 
 	const schemaParseResult = configScheme.safeParse(
@@ -27,12 +26,9 @@ export default async function install() {
 	);
 
 	if (!schemaParseResult.success) {
-		logError(
+		throw new InvalidConfigError(
 			`${packageName} config file is invalid. Run '${packageName} init --force' to generate a new one.`
 		);
-		log('');
-
-		process.exit(1);
 	}
 
 	const config = schemaParseResult.data;
@@ -41,9 +37,8 @@ export default async function install() {
 		logInfo(
 			`${packageName} is disabled. change the 'enable' key to 'true' in '${configFileName}' file if you wish.`
 		);
-		log('');
 
-		process.exit(0);
+		return;
 	}
 
 	const globPatterns = config.packages.filter((p) => p.includes('*'));
@@ -90,7 +85,7 @@ export default async function install() {
 	const invalidPackages = packagesPaths.filter((p) => !p.valid);
 
 	if (validPackages.length === 0) {
-		logInfo(`${packageName} has no valid packages to install.`);
+		logWarn(`${packageName} has no valid packages to install.`);
 	} else {
 		await exec(
 			[
@@ -112,11 +107,9 @@ export default async function install() {
 	if (invalidPackages.length) {
 		log('');
 		logWarn(
-			'Some packages are not installed because they are not valid packages. Please check the following packages:'
+			'Some packages are not installed because they are invalid. Please check the following packages:'
 		);
 
 		invalidPackages.forEach((p) => log(`   - ${p.name}`));
 	}
-
-	log('');
 }
