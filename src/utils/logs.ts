@@ -19,3 +19,8 @@ export function logWarn(message: string) {
 export function log(message: string) {
 	console.log(message);
 }
+
+export function logBlock(fn: () => void) {
+	log('');
+	fn();
+}

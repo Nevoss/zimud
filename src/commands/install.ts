@@ -3,7 +3,7 @@ import fse from 'fs-extra';
 import path from 'path';
 import { configFileName, packageJsonFileName, packageName } from '../consts';
 import { glob } from 'glob';
-import { log, logInfo, logSuccess, logWarn } from '../utils/logs';
+import { log, logBlock, logInfo, logSuccess, logWarn } from '../utils/logs';
 import { promisify } from 'util';
 import { exec as originalExec } from 'child_process';
 import InvalidConfigError from '../errors/invalid-config-error';
@@ -96,20 +96,22 @@ export default async function install() {
 			].join(' ')
 		);
 
-		log('');
-		logSuccess(
-			`${packageName} has successfully installed the following packages:`
-		);
+		logBlock(() => {
+			logSuccess(
+				`${packageName} has successfully installed the following packages:`
+			);
 
-		validPackages.forEach((p) => log(`   - ${p.name}`));
+			validPackages.forEach((p) => log(`   - ${p.name}`));
+		});
 	}
 
 	if (invalidPackages.length) {
-		log('');
-		logWarn(
-			'Some packages are not installed because they are invalid. Please check the following packages:'
-		);
+		logBlock(() => {
+			logWarn(
+				'Some packages are not installed because they are invalid. Please check the following packages:'
+			);
 
-		invalidPackages.forEach((p) => log(`   - ${p.name}`));
+			invalidPackages.forEach((p) => log(`   - ${p.name}`));
+		});
 	}
 }
