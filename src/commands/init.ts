@@ -21,17 +21,13 @@ export default async function init({ force }: { force: boolean }) {
 	);
 
 	logBlock(() => {
-		logSuccess(`${packageName} config file was generated successfully.`);
-		// TODO: log which file was modified and generated.
+		logSuccess(`${configFileName} was generated successfully.`);
+		gitIgnoreModifiedSuccessfully
+			? logSuccess(`${gitIgnoreFileName} was updated.`)
+			: logWarn(
+					`Could not read ${gitIgnoreFileName} file. Please add ${configFileName} to ${gitIgnoreFileName} manually.`
+			  );
 	});
-
-	if (!gitIgnoreModifiedSuccessfully) {
-		logBlock(() => {
-			logWarn(
-				`Could not read ${gitIgnoreFileName} file. Please add ${configFileName} to ${gitIgnoreFileName} manually.`
-			);
-		});
-	}
 }
 
 async function isConfigFileExists(configFileName: string) {
@@ -55,7 +51,7 @@ async function appendConfigFileToGitIgnore(
 		const gitIgnoreFileContent = await fse.readFile(gitIgnoreFileName);
 
 		if (!gitIgnoreFileContent.includes(configFileName)) {
-			await fse.appendFile(gitIgnoreFileName, configFileName);
+			await fse.appendFile(gitIgnoreFileName, `${configFileName}\n`);
 		}
 
 		return true;
