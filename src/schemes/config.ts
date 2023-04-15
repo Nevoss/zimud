@@ -1,4 +1,5 @@
 import z from 'zod';
+import { packageName } from '../consts';
 
 const schema = z
 	.object({
@@ -7,7 +8,7 @@ const schema = z
 			.array(z.string())
 			.describe('An array of glob patterns to match packages to link.'),
 	})
-	.describe('Config schema for plink.');
+	.describe(`Config schema for ${packageName}.`);
 
 export type Config = z.infer<typeof schema>;
 export default schema;
