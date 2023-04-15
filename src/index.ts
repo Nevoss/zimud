@@ -3,12 +3,13 @@
 import { Command, CommanderError } from 'commander';
 import { install, init } from './commands';
 import wrapCommand from './utils/wrap-command';
+import { packageName } from './consts';
 
 async function main() {
 	const program = new Command();
 
 	program
-		.name('plink')
+		.name(packageName)
 		.description('A command line tool for linking packages');
 
 	program.command('install').action(wrapCommand(install));
