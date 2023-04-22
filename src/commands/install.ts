@@ -3,7 +3,7 @@ import fse from 'fs-extra';
 import path from 'path';
 import { configFileName, packageJsonFileName, packageName } from '../consts';
 import { glob } from 'glob';
-import { log, logBlock, logInfo, logSuccess, logWarn } from '../utils/logs';
+import { log, logInfo, logSuccess, logWarn, spinner } from '../utils/logs';
 import { promisify } from 'util';
 import { exec as originalExec } from 'child_process';
 import InvalidConfigError from '../errors/invalid-config-error';
@@ -11,7 +11,7 @@ import InvalidConfigError from '../errors/invalid-config-error';
 const exec = promisify(originalExec);
 
 export default async function install() {
-	logInfo(`${packageName} install command is running...`);
+	const time = process.hrtime();
 
 	if (!(await isConfigFileExists(configFileName))) {
 		logInfo(
@@ -35,31 +35,47 @@ export default async function install() {
 		await extractPackages(config.packages)
 	);
 
+	const messagesFns: (() => void)[] = [];
+
 	if (validPackages.length === 0) {
-		logWarn(`${packageName} has no valid packages to install.`);
+		messagesFns.push(() => logWarn('No valid packages to install.'));
 	}
 
 	if (validPackages.length > 0) {
-		await installPackages(validPackages);
+		await spinner(`${packageName} is installing packages...`, () =>
+			installPackages(validPackages)
+		);
 
 		const packageNames = await extractPackagesNames(validPackages);
 
-		logBlock(() => {
+		const [secondsTimeDiff, nanosecondsTimeDiff] = process.hrtime(time);
+
+		messagesFns.push(() => {
 			logSuccess(
-				`${packageName} has successfully installed the following packages:`
+				`${packageName} has successfully installed the following packages (in ${secondsTimeDiff}s ${(
+					nanosecondsTimeDiff / 1e6
+				).toFixed()}ms):`
 			);
 			logPackages(packageNames);
 		});
 	}
 
 	if (invalidPackages.length) {
-		logBlock(() => {
+		messagesFns.push(() => {
 			logWarn(
 				'Some packages are not installed because they are invalid. Please check the following packages:'
 			);
 			logPackages(invalidPackages);
 		});
 	}
+
+	messagesFns.forEach((messageFn, index) => {
+		if (index > 0) {
+			log('');
+		}
+
+		messageFn();
+	});
 }
 
 async function isConfigFileExists(configFileName: string) {

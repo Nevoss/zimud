@@ -19,8 +19,25 @@ export function logWarn(message: string) {
 export function log(message: string) {
 	console.log(message);
 }
+export async function spinner<T>(
+	title: string,
+	callback?: () => T
+): Promise<T> {
+	let i = 0;
 
-export function logBlock(fn: () => void) {
-	log('');
-	fn();
+	const id = setInterval(() => {
+		process.stderr.write(` ${'⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'[i++ % 10]} ${title}\r`);
+	}, 100);
+
+	let result: T;
+
+	try {
+		result = await callback!();
+	} finally {
+		clearInterval(id);
+
+		process.stderr.write(' '.repeat(process.stdout.columns - 1) + '\r');
+	}
+
+	return result;
 }
