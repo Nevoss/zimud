@@ -10,7 +10,11 @@ import InvalidConfigError from '../errors/invalid-config-error';
 
 const exec = promisify(originalExec);
 
-export default async function install() {
+type CommandOptions = {
+	dryRun: boolean;
+};
+
+export default async function install({ dryRun = false }: CommandOptions) {
 	const time = process.hrtime();
 
 	if (!(await isConfigFileExists(configFileName))) {
@@ -42,9 +46,11 @@ export default async function install() {
 	}
 
 	if (validPackages.length > 0) {
-		await spinner(`${packageName} is installing packages...`, () =>
-			installPackages(validPackages)
-		);
+		if (!dryRun) {
+			await spinner(`${packageName} is installing packages...`, () =>
+				installPackages(validPackages)
+			);
+		}
 
 		const packageNames = await extractPackagesNames(validPackages);
 
@@ -52,9 +58,11 @@ export default async function install() {
 
 		messagesFns.push(() => {
 			logSuccess(
-				`${packageName} has successfully installed the following packages (in ${secondsTimeDiff}s ${(
-					nanosecondsTimeDiff / 1e6
-				).toFixed()}ms):`
+				dryRun
+					? 'The following packages would have been installed:'
+					: `${packageName} has successfully installed the following packages (in ${secondsTimeDiff}s ${(
+							nanosecondsTimeDiff / 1e6
+					  ).toFixed()}ms):`
 			);
 			logPackages(packageNames);
 		});
@@ -63,7 +71,9 @@ export default async function install() {
 	if (invalidPackages.length) {
 		messagesFns.push(() => {
 			logWarn(
-				'Some packages are not installed because they are invalid. Please check the following packages:'
+				dryRun
+					? 'The following packages are invalid:'
+					: 'Some packages are not installed because they are invalid. Please check the following packages:'
 			);
 			logPackages(invalidPackages);
 		});

@@ -12,7 +12,14 @@ async function main() {
 		.name(packageName)
 		.description('A command line tool for linking packages');
 
-	program.command('install').action(wrapCommand(install));
+	program
+		.command('install')
+		.option(
+			'--dry-run',
+			'run the command without actually installing the packages, just print the packages that will be installed.'
+		)
+		.action(wrapCommand(install));
+
 	program
 		.command('init')
 		.option(
