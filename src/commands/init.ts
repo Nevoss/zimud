@@ -4,7 +4,11 @@ import { configFileName, gitIgnoreFileName, packageName } from '../consts';
 import { Config } from '../schemes/config';
 import ConfigFileExistsError from '../errors/config-file-exists-error';
 
-export default async function init({ force }: { force: boolean }) {
+type CommandOptions = {
+	force: boolean;
+};
+
+export default async function init({ force = false }: CommandOptions) {
 	if ((await isConfigFileExists(configFileName)) && !force) {
 		throw new ConfigFileExistsError(
 			`${packageName} config file already exists. Run '${packageName} init --force' to generate a new one.`
