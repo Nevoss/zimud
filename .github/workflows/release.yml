@@ -4,10 +4,15 @@ on: [workflow_dispatch]
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-    publish:
+    release:
+        name: Release
         runs-on: ubuntu-latest
+        if: github.repository == 'nevoss/pkg-link'
         steps:
+
         - uses: actions/checkout@v2
+          with:
+            fetch-depth: 0
 
         - uses: pnpm/action-setup@v2
           with:
