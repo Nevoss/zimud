@@ -3,32 +3,40 @@ on: [workflow_dispatch]
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+permissions: {}
+
 jobs:
     release:
         name: Release
         runs-on: ubuntu-latest
+
         if: github.repository == 'nevoss/pkg-link'
+
+        permissions:
+          contents: write  #  to create release (changesets/action)
+          issues: write # to post issue comments (changesets/action)
+          pull-requests: write  #  to create pull request (changesets/action)
+
         steps:
+          - uses: actions/checkout@v2
+            with:
+              fetch-depth: 0
 
-        - uses: actions/checkout@v2
-          with:
-            fetch-depth: 0
+          - uses: pnpm/action-setup@v2
+            with:
+              version: 7
 
-        - uses: pnpm/action-setup@v2
-          with:
-            version: 7
+          - uses: actions/setup-node@v2
+            with:
+              node-version: 16
+              cache: "pnpm"
 
-        - uses: actions/setup-node@v2
-          with:
-            node-version: 16
-            cache: "pnpm"
-
-        - run: pnpm install --frozen-lockfile
-        - name: Create release PR or publish
-          id: changesets
-          uses: changesets/action@v1
-          with:
-            publish: pnpm run build
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          - run: pnpm install --frozen-lockfile
+          - name: Create release PR or publish
+            id: changesets
+            uses: changesets/action@v1
+            with:
+              publish: pnpm run build
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
