@@ -1,12 +1,12 @@
 {
-	"name": "plink",
+	"name": "pkg-link",
 	"version": "0.0.0",
 	"description": "ClI tool for creating and managing packages links",
 	"author": "Nevo Golan",
 	"license": "MIT",
 	"type": "commonjs",
 	"bin": {
-		"plink": "dist/index.mjs"
+		"pkg-link": "dist/index.mjs"
 	},
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",

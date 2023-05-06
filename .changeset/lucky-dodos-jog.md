@@ -1,5 +1,5 @@
 ---
-'plink': minor
+'pkg-link': minor
 ---
 
 Initial logic of the packages which allows:
