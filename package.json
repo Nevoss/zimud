@@ -1,6 +1,6 @@
 {
 	"name": "pkg-link",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "ClI tool for creating and managing packages links",
 	"author": "Nevo Golan",
 	"license": "MIT",
