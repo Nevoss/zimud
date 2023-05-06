@@ -1,12 +1,12 @@
 {
-	"name": "pkg-link",
+	"name": "zimud",
 	"version": "0.1.0",
 	"description": "ClI tool for creating and managing packages links",
 	"author": "Nevo Golan",
 	"license": "MIT",
 	"type": "commonjs",
 	"bin": {
-		"pkg-link": "dist/index.mjs"
+		"zimud": "dist/index.mjs"
 	},
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",

@@ -1,4 +1,4 @@
-export const packageName = 'pkg-link' as const;
+export const packageName = 'zimud' as const;
 
 export const configFileName = `.${packageName}.json` as const;
 

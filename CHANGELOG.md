@@ -1,4 +1,4 @@
-# pkg-link
+# zimud
 
 ## 0.1.0
 

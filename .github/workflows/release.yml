@@ -1,5 +1,8 @@
 name: Release
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - main
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -10,7 +13,7 @@ jobs:
         name: Release
         runs-on: ubuntu-latest
 
-        if: github.repository == 'nevoss/pkg-link'
+        if: github.repository == 'nevoss/zimud'
 
         permissions:
           contents: write  #  to create release (changesets/action)
