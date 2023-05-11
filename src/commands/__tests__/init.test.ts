@@ -34,24 +34,20 @@ describe('zimud init', () => {
 
 	it('should throw an error if config file already exists', () => {
 		// Arrange.
-		const program = createProgram();
-
 		vol.writeFileSync(path.resolve(baseDir, '.zimud.json'), '');
 
 		// Act & Assert.
-		return expect(() =>
-			program.parseAsync(['node', 'zimud', 'init'])
-		).rejects.toThrowError('config file already exists');
+		return expect(() => runCommand('zimud init')).rejects.toThrowError(
+			'config file already exists'
+		);
 	});
 
 	it('should forcefully create config file when passing `--force`', async () => {
 		// Arrange.
-		const program = createProgram();
-
 		vol.writeFileSync(path.resolve(baseDir, '.zimud.json'), '');
 
 		// Act.
-		await program.parseAsync(['node', 'zimud', 'init', '--force']);
+		await runCommand('zimud init --force');
 
 		// Assert.
 		const configFileExists = await fse.pathExists(
@@ -63,15 +59,13 @@ describe('zimud init', () => {
 
 	it('should create a config file and append to gitignore', async () => {
 		// Arrange.
-		const program = createProgram();
-
 		vol.writeFileSync(
 			path.resolve(baseDir, '.gitignore'),
 			'existing-file.ts\n'
 		);
 
 		// Act.
-		await program.parseAsync(['node', 'zimud', 'init']);
+		await runCommand('zimud init');
 
 		// Assert.
 		const configFileExists = await fse.pathExists(
@@ -92,14 +86,12 @@ describe('zimud init', () => {
 		expect(logSuccess).toHaveBeenCalledWith('.gitignore was updated.');
 	});
 
-	it('should no append to gitignore when it already exist', async () => {
+	it("should not append to gitignore when it's already there", async () => {
 		// Arrange.
-		const program = createProgram();
-
 		vol.writeFileSync(path.resolve(baseDir, '.gitignore'), '.zimud.json');
 
 		// Act.
-		await program.parseAsync(['node', 'zimud', 'init']);
+		await runCommand('zimud init');
 
 		// Assert.
 		const gitIgnoreFileContent = vol
@@ -110,11 +102,8 @@ describe('zimud init', () => {
 	});
 
 	it('should warn when there is no gitignore', async () => {
-		// Arrange.
-		const program = createProgram();
-
 		// Act.
-		await program.parseAsync(['node', 'zimud', 'init']);
+		await runCommand('zimud init');
 
 		// Assert.
 		expect(logWarn).toHaveBeenCalledWith(
@@ -122,3 +111,9 @@ describe('zimud init', () => {
 		);
 	});
 });
+
+function runCommand(command: string) {
+	const argv = command.split(' ');
+
+	return createProgram().parseAsync(['node', ...argv]);
+}
