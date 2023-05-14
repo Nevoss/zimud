@@ -1,32 +1,13 @@
 import path from 'path';
-import { createProgram } from '../../create-program';
 import { vol } from 'memfs';
 import fse from 'fs-extra';
 import { logSuccess, logWarn } from '../../utils/logs';
-
-jest.mock('fs', () => ({
-	...jest.requireActual('memfs'),
-	// fs-extra uses `realpath.native` which is not implemented in memfs.
-	realpath: {
-		...jest.requireActual('memfs').realpath,
-		native: jest.fn(),
-	},
-}));
-
-jest.mock('../../utils/logs', () => ({
-	logError: jest.fn(),
-	logSuccess: jest.fn(),
-	logInfo: jest.fn(),
-	logWarn: jest.fn(),
-	log: jest.fn(),
-}));
+import { runCommand } from 'test-utils';
 
 const baseDir = path.resolve(__dirname, '../../../');
 
 describe('zimud init', () => {
 	beforeEach(() => {
-		vol.reset();
-
 		vol.mkdirSync(baseDir, {
 			recursive: true,
 		});
@@ -111,9 +92,3 @@ describe('zimud init', () => {
 		);
 	});
 });
-
-function runCommand(command: string) {
-	const argv = command.split(' ');
-
-	return createProgram().parseAsync(['node', ...argv]);
-}
