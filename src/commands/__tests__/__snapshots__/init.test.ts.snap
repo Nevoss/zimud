@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`zimud init should create a config file and append to gitignore 1`] = `
+"
+.zimud.json was generated successfully.
+.gitignore was updated.
+"
+`;
+
+exports[`zimud init should warn when there is no gitignore 1`] = `
+"
+.zimud.json was generated successfully.
+Could not read .gitignore file. Please add .zimud.json to .gitignore manually.
+"
+`;

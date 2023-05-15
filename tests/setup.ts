@@ -1,4 +1,5 @@
 import { vol } from 'memfs';
+import { addLog as mockAddLog, resetLog } from './test-utils/log-mock';
 
 jest.mock('fs', () => ({
 	...jest.requireActual('memfs'),
@@ -10,16 +11,28 @@ jest.mock('fs', () => ({
 }));
 
 jest.mock('../src/utils/logs', () => ({
-	logError: jest.fn(),
-	logSuccess: jest.fn(),
-	logInfo: jest.fn(),
-	logWarn: jest.fn(),
-	log: jest.fn(),
+	logError: jest.fn(mockAddLog),
+	logSuccess: jest.fn(mockAddLog),
+	logInfo: jest.fn(mockAddLog),
+	logWarn: jest.fn(mockAddLog),
+	log: jest.fn(mockAddLog),
 	spinner: jest.fn((title, callback) => callback()),
 }));
+
+const originalCwd = process.cwd();
+
+beforeAll(() => {
+	process.chdir('/');
+});
+
+afterAll(() => {
+	process.chdir(originalCwd);
+});
 
 beforeEach(() => {
 	vol.reset();
 
 	jest.clearAllMocks();
+
+	resetLog();
 });

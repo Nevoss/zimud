@@ -1,4 +1,4 @@
-import { createProgram } from '../src/create-program';
+import { createProgram } from '../../src/create-program';
 
 export function runCommand(command: string) {
 	const argv = command.split(' ');
