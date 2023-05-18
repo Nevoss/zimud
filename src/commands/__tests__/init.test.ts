@@ -1,40 +1,11 @@
-import path from 'path';
-import { createProgram } from '../../create-program';
 import { vol } from 'memfs';
 import fse from 'fs-extra';
-import { logSuccess, logWarn } from '../../utils/logs';
-
-jest.mock('fs', () => ({
-	...jest.requireActual('memfs'),
-	// fs-extra uses `realpath.native` which is not implemented in memfs.
-	realpath: {
-		...jest.requireActual('memfs').realpath,
-		native: jest.fn(),
-	},
-}));
-
-jest.mock('../../utils/logs', () => ({
-	logError: jest.fn(),
-	logSuccess: jest.fn(),
-	logInfo: jest.fn(),
-	logWarn: jest.fn(),
-	log: jest.fn(),
-}));
-
-const baseDir = path.resolve(__dirname, '../../../');
+import { getLog, runCommand } from 'test-utils';
 
 describe('zimud init', () => {
-	beforeEach(() => {
-		vol.reset();
-
-		vol.mkdirSync(baseDir, {
-			recursive: true,
-		});
-	});
-
 	it('should throw an error if config file already exists', () => {
 		// Arrange.
-		vol.writeFileSync(path.resolve(baseDir, '.zimud.json'), '');
+		vol.writeFileSync('.zimud.json', '');
 
 		// Act & Assert.
 		return expect(() => runCommand('zimud init')).rejects.toThrowError(
@@ -44,59 +15,44 @@ describe('zimud init', () => {
 
 	it('should forcefully create config file when passing `--force`', async () => {
 		// Arrange.
-		vol.writeFileSync(path.resolve(baseDir, '.zimud.json'), '');
+		vol.writeFileSync('.zimud.json', '');
 
 		// Act.
 		await runCommand('zimud init --force');
 
 		// Assert.
-		const configFileExists = await fse.pathExists(
-			path.resolve(baseDir, '.zimud.json')
-		);
+		const configFileExists = await fse.pathExists('.zimud.json');
 
 		expect(configFileExists).toBe(true);
 	});
 
 	it('should create a config file and append to gitignore', async () => {
 		// Arrange.
-		vol.writeFileSync(
-			path.resolve(baseDir, '.gitignore'),
-			'existing-file.ts\n'
-		);
+		vol.writeFileSync('.gitignore', 'existing-file.ts\n');
 
 		// Act.
 		await runCommand('zimud init');
 
 		// Assert.
-		const configFileExists = await fse.pathExists(
-			path.resolve(baseDir, '.zimud.json')
-		);
+		const configFileExists = await fse.pathExists('.zimud.json');
 
-		const gitIgnoreFileContent = vol
-			.readFileSync(path.resolve(baseDir, '.gitignore'))
-			.toString();
+		const gitIgnoreFileContent = vol.readFileSync('.gitignore').toString();
 
 		expect(configFileExists).toBe(true);
 		expect(gitIgnoreFileContent).toBe('existing-file.ts\n.zimud.json\n');
 
-		expect(logSuccess).toHaveBeenCalledWith(
-			'.zimud.json was generated successfully.'
-		);
-
-		expect(logSuccess).toHaveBeenCalledWith('.gitignore was updated.');
+		expect(getLog()).toMatchSnapshot();
 	});
 
 	it("should not append to gitignore when it's already there", async () => {
 		// Arrange.
-		vol.writeFileSync(path.resolve(baseDir, '.gitignore'), '.zimud.json');
+		vol.writeFileSync('.gitignore', '.zimud.json');
 
 		// Act.
 		await runCommand('zimud init');
 
 		// Assert.
-		const gitIgnoreFileContent = vol
-			.readFileSync(path.resolve(baseDir, '.gitignore'))
-			.toString();
+		const gitIgnoreFileContent = vol.readFileSync('.gitignore').toString();
 
 		expect(gitIgnoreFileContent).toBe('.zimud.json');
 	});
@@ -106,14 +62,6 @@ describe('zimud init', () => {
 		await runCommand('zimud init');
 
 		// Assert.
-		expect(logWarn).toHaveBeenCalledWith(
-			'Could not read .gitignore file. Please add .zimud.json to .gitignore manually.'
-		);
+		expect(getLog()).toMatchSnapshot();
 	});
 });
-
-function runCommand(command: string) {
-	const argv = command.split(' ');
-
-	return createProgram().parseAsync(['node', ...argv]);
-}

@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`zimud install should fail when the pacakge is disabled 1`] = `
+"
+zimud is disabled. change the 'enable' key to 'true' in '.zimud.json' file if you wish.
+"
+`;
+
+exports[`zimud install should fail when there is no config file 1`] = `
+"
+zimud config file was not found. Run 'zimud init' if you wish to generate a new one.
+"
+`;
+
+exports[`zimud install should install the packages 1`] = `
+"
+zimud has successfully installed the following packages (in 0s 0ms):
+   - package-b
+   - package-a
+"
+`;
+
+exports[`zimud install should not install the packages when passing \`--dry-run\` 1`] = `
+"
+The following packages would have been installed:
+   - valid-package
+"
+`;
+
+exports[`zimud install should warn when there are invalid packages 1`] = `
+"
+No valid packages to install.
+
+Some packages are not installed because they are invalid. Please check the following packages:
+   - /invalid-package
+"
+`;
